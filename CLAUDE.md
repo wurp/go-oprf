@@ -96,6 +96,12 @@ Running notes during current session:
    - Delete resolved items
    - Move critical info to appropriate location (code comments, next PLAN file)
 4. Create `plan/PLAN-1-(N+1).md` for next step (if not already exists)
+5. Tidy everything up:
+   - Clear TodoWrite list or mark all as completed
+   - Ensure all changes are committed
+   - Verify tests pass
+   - Check for any temporary files or uncommitted work
+6. **Inform user**: Explicitly let the user know tidying is complete and we're ready for the next step
 
 ### When a Plan is Too Large
 If tasks in `plan/PLAN-1-N.md` exceed 8 hours:
