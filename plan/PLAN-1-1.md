@@ -111,12 +111,12 @@ Set up the Go project structure and thoroughly understand the C implementation b
 - Take extra time on constant-time operations
 
 ## Completion Criteria
-- [ ] Go module initialized with dependencies
-- [ ] Package structure created
-- [ ] C-API-ANALYSIS.md complete
-- [ ] TEST-VECTORS.md complete with at least 3-5 vectors
-- [ ] Initial test files created
-- [ ] Ready to begin actual porting in PLAN-1-2
+- [x] Go module initialized with dependencies
+- [x] Package structure created
+- [x] C-API-ANALYSIS.md complete
+- [x] TEST-VECTORS.md complete with at least 3-5 vectors
+- [x] Initial test files created
+- [x] Ready to begin actual porting in PLAN-1-2
 
 ## Dependencies for Next Step
 PLAN-1-2 (Basic OPRF Implementation) will need:

@@ -72,7 +72,8 @@ Port liboprf C library from ~/projects/git/liboprf to pure Go implementation wit
 - Production-ready library
 
 ## Current Status
-Starting with Step 1.
+- **Step 1**: ✅ Complete
+- **Step 2**: Ready to begin (See PLAN-1-2.md)
 
 ## Notes for Later Steps
 (Add notes here as work progresses)
