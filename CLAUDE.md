@@ -1,5 +1,8 @@
 # Go OPRF Project - Planning Methodology
 
+## Legacy note
+All files used by Claude Code to create and review this project were moved to either claude-artifacts/construction or claude-artifacts/review; translate paths appropriately (e.g. plan/ -> claude-artifacts/construction/plan)
+
 ## Project Overview
 Porting liboprf C library to pure Go with byte-compatible output. Source: ~/projects/git/liboprf
 
