@@ -1,8 +1,8 @@
 # Security Review - Go OPRF Implementation
 
-**Date:** 2025-11-05
-**Reviewer:** Claude Code (AI Assistant)
-**Scope:** Complete codebase review focusing on cryptographic security
+* **Date:** 2025-11-05
+* **Reviewer:** Claude Code (AI Assistant)
+* **Scope:** Complete codebase review focusing on cryptographic security
 
 ## Executive Summary
 
