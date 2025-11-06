@@ -1,0 +1,1 @@
+This is a Go clone of https://github.com/stef/liboprf, done entirely by Claude Code. I have not yet checked that it is correct - I did have Claude review it, and it should be passing the same tests that https://github.com/stef/liboprf passes.
