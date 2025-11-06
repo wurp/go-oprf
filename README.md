@@ -1,5 +1,7 @@
 # go-oprf
 
+-- This is a Go clone of liboprf, done entirely by Claude Code. No human has yet checked that it is correct - I did have Claude review it, and it should be passing the same tests that https://github.com/stef/liboprf passes. --
+
 Pure Go implementation of Oblivious Pseudorandom Functions (OPRF), Threshold OPRF, and Distributed Key Generation (DKG) protocols.
 
 This library provides cryptographic protocols for privacy-preserving computations, ported from the [liboprf](https://github.com/stef/liboprf) C implementation with byte-for-byte compatibility.
