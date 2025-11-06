@@ -1,0 +1,56 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.txt
+coverage.html
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Dependency directories (if using vendor)
+vendor/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
+tmp/
+
+# Session notes (per CLAUDE.md - keep minimal, should be cleaned up)
+plan/NOTES.md
+
+# Temporary analysis files (per CLAUDE.md - delete when done)
+# C-API-ANALYSIS.md  # Already deleted
+# TEST-VECTORS.md    # Already deleted
+
+# Build artifacts
+*.o
+*.a
+*.out
+
+# Profiling data
+*.prof
+cpu.pprof
+mem.pprof
+
+# Benchmarking results (optional - may want to commit these)
+# *.bench
