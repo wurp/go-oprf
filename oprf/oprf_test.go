@@ -3,6 +3,8 @@ package oprf
 import (
 	"encoding/hex"
 	"testing"
+
+	"github.com/gtank/ristretto255"
 )
 
 // Test vectors from IRTF CFRG OPRF specification
@@ -54,162 +56,253 @@ func mustDecodeHex(s string) []byte {
 
 // TestBlind tests the Blind function with test vectors
 func TestBlind(t *testing.T) {
-	t.Skip("TODO: implement oprf.Blind")
-
 	for _, tv := range testVectors {
 		t.Run(tv.name, func(t *testing.T) {
 			input := mustDecodeHex(tv.input)
 			blind := mustDecodeHex(tv.blind)
-			expectedBlinded := mustDecodeHex(tv.blindedElement)
-			_, _, _ = input, blind, expectedBlinded
 
-			// TODO: Implement Blind function
-			// r, alpha, err := Blind(input, blind)
-			// if err != nil {
-			//     t.Fatalf("Blind failed: %v", err)
-			// }
+			r, alpha, err := Blind(input, blind)
+			if err != nil {
+				t.Fatalf("Blind failed: %v", err)
+			}
+
+			// Verify r matches the provided blind
+			if hex.EncodeToString(r) != tv.blind {
+				t.Errorf("Returned blind mismatch:\ngot:  %s\nwant: %s", hex.EncodeToString(r), tv.blind)
+			}
 
 			// Verify blinded element matches expected value
-			// if !bytes.Equal(alpha, expectedBlinded) {
-			//     t.Errorf("Blinded element mismatch:\ngot:  %x\nwant: %x", alpha, expectedBlinded)
-			// }
+			if hex.EncodeToString(alpha) != tv.blindedElement {
+				t.Errorf("Blinded element mismatch:\ngot:  %s\nwant: %s", hex.EncodeToString(alpha), tv.blindedElement)
+			}
 		})
 	}
 }
 
 // TestEvaluate tests the Evaluate function with test vectors
 func TestEvaluate(t *testing.T) {
-	t.Skip("TODO: implement oprf.Evaluate")
-
 	privateKey := mustDecodeHex(testPrivateKey)
-	_ = privateKey
 
 	for _, tv := range testVectors {
 		t.Run(tv.name, func(t *testing.T) {
 			blindedElement := mustDecodeHex(tv.blindedElement)
-			expectedEvaluation := mustDecodeHex(tv.evaluationElement)
-			_, _ = blindedElement, expectedEvaluation
 
-			// TODO: Implement Evaluate function
-			// beta, err := Evaluate(privateKey, blindedElement)
-			// if err != nil {
-			//     t.Fatalf("Evaluate failed: %v", err)
-			// }
+			beta, err := Evaluate(privateKey, blindedElement)
+			if err != nil {
+				t.Fatalf("Evaluate failed: %v", err)
+			}
 
 			// Verify evaluation element matches expected value
-			// if !bytes.Equal(beta, expectedEvaluation) {
-			//     t.Errorf("Evaluation element mismatch:\ngot:  %x\nwant: %x", beta, expectedEvaluation)
-			// }
+			if hex.EncodeToString(beta) != tv.evaluationElement {
+				t.Errorf("Evaluation element mismatch:\ngot:  %s\nwant: %s", hex.EncodeToString(beta), tv.evaluationElement)
+			}
 		})
 	}
 }
 
 // TestUnblind tests the Unblind function with test vectors
 func TestUnblind(t *testing.T) {
-	t.Skip("TODO: implement oprf.Unblind")
-
 	for _, tv := range testVectors {
 		t.Run(tv.name, func(t *testing.T) {
 			blind := mustDecodeHex(tv.blind)
 			evaluationElement := mustDecodeHex(tv.evaluationElement)
-			_, _ = blind, evaluationElement
 
-			// TODO: Implement Unblind function
-			// n, err := Unblind(blind, evaluationElement)
-			// if err != nil {
-			//     t.Fatalf("Unblind failed: %v", err)
-			// }
+			n, err := Unblind(blind, evaluationElement)
+			if err != nil {
+				t.Fatalf("Unblind failed: %v", err)
+			}
+
+			// Verify n is a valid ristretto255 element (32 bytes)
+			if len(n) != ElementBytes {
+				t.Errorf("Unblinded element has wrong length: got %d, want %d", len(n), ElementBytes)
+			}
 
 			// Note: We don't have the expected N value in test vectors
-			// It will be verified implicitly through Finalize
+			// It will be verified implicitly through Finalize in the end-to-end test
 		})
 	}
 }
 
 // TestFinalize tests the Finalize function with test vectors
 func TestFinalize(t *testing.T) {
-	t.Skip("TODO: implement oprf.Finalize")
+	privateKey := mustDecodeHex(testPrivateKey)
 
 	for _, tv := range testVectors {
 		t.Run(tv.name, func(t *testing.T) {
 			input := mustDecodeHex(tv.input)
-			expectedOutput := mustDecodeHex(tv.output)
-			_, _ = input, expectedOutput
+			blind := mustDecodeHex(tv.blind)
 
-			// TODO: Need to get N from Unblind first
-			// For now, this test is a placeholder
+			// First, we need to compute N through the full flow
+			// Blind
+			_, alpha, err := Blind(input, blind)
+			if err != nil {
+				t.Fatalf("Blind failed: %v", err)
+			}
 
-			// output, err := Finalize(input, n)
-			// if err != nil {
-			//     t.Fatalf("Finalize failed: %v", err)
-			// }
+			// Evaluate
+			beta, err := Evaluate(privateKey, alpha)
+			if err != nil {
+				t.Fatalf("Evaluate failed: %v", err)
+			}
+
+			// Unblind to get N
+			n, err := Unblind(blind, beta)
+			if err != nil {
+				t.Fatalf("Unblind failed: %v", err)
+			}
+
+			// Now test Finalize
+			output, err := Finalize(input, n)
+			if err != nil {
+				t.Fatalf("Finalize failed: %v", err)
+			}
 
 			// Verify output matches expected value
-			// if !bytes.Equal(output, expectedOutput) {
-			//     t.Errorf("Output mismatch:\ngot:  %x\nwant: %x", output, expectedOutput)
-			// }
+			if hex.EncodeToString(output) != tv.output {
+				t.Errorf("Output mismatch:\ngot:  %s\nwant: %s", hex.EncodeToString(output), tv.output)
+			}
 		})
 	}
 }
 
 // TestOPRFEndToEnd tests the complete OPRF protocol flow
 func TestOPRFEndToEnd(t *testing.T) {
-	t.Skip("TODO: implement complete OPRF flow")
-
 	privateKey := mustDecodeHex(testPrivateKey)
-	_ = privateKey
 
 	for _, tv := range testVectors {
 		t.Run(tv.name, func(t *testing.T) {
 			input := mustDecodeHex(tv.input)
 			blind := mustDecodeHex(tv.blind)
-			expectedOutput := mustDecodeHex(tv.output)
-			_, _, _ = input, blind, expectedOutput
 
 			// Client: Blind
-			// r, alpha, err := Blind(input, blind)
-			// if err != nil {
-			//     t.Fatalf("Blind failed: %v", err)
-			// }
+			r, alpha, err := Blind(input, blind)
+			if err != nil {
+				t.Fatalf("Blind failed: %v", err)
+			}
+
+			// Verify alpha matches expected
+			if hex.EncodeToString(alpha) != tv.blindedElement {
+				t.Errorf("Alpha mismatch:\ngot:  %s\nwant: %s", hex.EncodeToString(alpha), tv.blindedElement)
+			}
 
 			// Server: Evaluate
-			// beta, err := Evaluate(privateKey, alpha)
-			// if err != nil {
-			//     t.Fatalf("Evaluate failed: %v", err)
-			// }
+			beta, err := Evaluate(privateKey, alpha)
+			if err != nil {
+				t.Fatalf("Evaluate failed: %v", err)
+			}
+
+			// Verify beta matches expected
+			if hex.EncodeToString(beta) != tv.evaluationElement {
+				t.Errorf("Beta mismatch:\ngot:  %s\nwant: %s", hex.EncodeToString(beta), tv.evaluationElement)
+			}
 
 			// Client: Unblind
-			// n, err := Unblind(r, beta)
-			// if err != nil {
-			//     t.Fatalf("Unblind failed: %v", err)
-			// }
+			n, err := Unblind(r, beta)
+			if err != nil {
+				t.Fatalf("Unblind failed: %v", err)
+			}
 
 			// Client: Finalize
-			// output, err := Finalize(input, n)
-			// if err != nil {
-			//     t.Fatalf("Finalize failed: %v", err)
-			// }
+			output, err := Finalize(input, n)
+			if err != nil {
+				t.Fatalf("Finalize failed: %v", err)
+			}
 
 			// Verify final output matches expected value
-			// if !bytes.Equal(output, expectedOutput) {
-			//     t.Errorf("Final output mismatch:\ngot:  %x\nwant: %x", output, expectedOutput)
-			// }
+			if hex.EncodeToString(output) != tv.output {
+				t.Errorf("Final output mismatch:\ngot:  %s\nwant: %s", hex.EncodeToString(output), tv.output)
+			}
 		})
 	}
 }
 
-// TestExpandMessageXMD tests the expand_message_xmd function
-func TestExpandMessageXMD(t *testing.T) {
-	t.Skip("TODO: implement expand_message_xmd")
+// TestKeyGen tests the KeyGen function
+func TestKeyGen(t *testing.T) {
+	// Generate multiple keys and verify they're valid
+	for i := 0; i < 10; i++ {
+		key, err := KeyGen()
+		if err != nil {
+			t.Fatalf("KeyGen failed: %v", err)
+		}
 
-	// TODO: Add test vectors for expand_message_xmd
-	// This is a critical function for hash-to-curve
+		// Verify key length
+		if len(key) != ScalarBytes {
+			t.Errorf("Key has wrong length: got %d, want %d", len(key), ScalarBytes)
+		}
+
+		// Verify key can be decoded as a valid scalar
+		scalar := ristretto255.NewScalar()
+		if err := scalar.Decode(key); err != nil {
+			t.Errorf("Generated key is not a valid scalar: %v", err)
+		}
+	}
+
+	// Verify keys are different (not stuck on a fixed value)
+	key1, _ := KeyGen()
+	key2, _ := KeyGen()
+	if hex.EncodeToString(key1) == hex.EncodeToString(key2) {
+		t.Error("KeyGen generated identical keys (unlikely to be random)")
+	}
 }
 
-// TestHashToGroup tests the hash-to-group function
-func TestHashToGroup(t *testing.T) {
-	t.Skip("TODO: implement hash_to_group")
+// Benchmarks
 
-	// TODO: Add test vectors for hash-to-group
-	// This function maps arbitrary input to ristretto255 points
+func BenchmarkBlind(b *testing.B) {
+	input := []byte("benchmark-password")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _, _ = Blind(input, nil)
+	}
+}
+
+func BenchmarkEvaluate(b *testing.B) {
+	privateKey := mustDecodeHex(testPrivateKey)
+	input := []byte("benchmark-password")
+	_, alpha, _ := Blind(input, nil)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = Evaluate(privateKey, alpha)
+	}
+}
+
+func BenchmarkUnblind(b *testing.B) {
+	privateKey := mustDecodeHex(testPrivateKey)
+	input := []byte("benchmark-password")
+	r, alpha, _ := Blind(input, nil)
+	beta, _ := Evaluate(privateKey, alpha)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = Unblind(r, beta)
+	}
+}
+
+func BenchmarkFinalize(b *testing.B) {
+	privateKey := mustDecodeHex(testPrivateKey)
+	input := []byte("benchmark-password")
+	r, alpha, _ := Blind(input, nil)
+	beta, _ := Evaluate(privateKey, alpha)
+	n, _ := Unblind(r, beta)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = Finalize(input, n)
+	}
+}
+
+func BenchmarkOPRFEndToEnd(b *testing.B) {
+	privateKey := mustDecodeHex(testPrivateKey)
+	input := []byte("benchmark-password")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r, alpha, _ := Blind(input, nil)
+		beta, _ := Evaluate(privateKey, alpha)
+		n, _ := Unblind(r, beta)
+		_, _ = Finalize(input, n)
+	}
+}
+
+func BenchmarkKeyGen(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = KeyGen()
+	}
 }
