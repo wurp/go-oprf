@@ -232,7 +232,7 @@ Integration tests verify threshold properties (dkg/integration_test.go:189-228).
 
 The Go OPRF implementation demonstrates solid cryptographic engineering practices. It correctly uses established cryptographic libraries, follows published specifications, and includes appropriate security measures like constant-time operations and secure random number generation.
 
-The implementation is suitable for production use. The minor recommendations around memory zeroing are defensive measures that would provide marginal additional security rather than addressing critical vulnerabilities.
+The implementation is suitable for production use (pending human review! BDM). The minor recommendations around memory zeroing are defensive measures that would provide marginal additional security rather than addressing critical vulnerabilities.
 
 **Recommended Actions:**
 1. ✓ Deploy to production with current implementation
